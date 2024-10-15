@@ -26,7 +26,6 @@ app.use(session({
     cookie: { secure: false } //set to true for https
 }));
 
-const path = require('path');
 app.set("view engine", "ejs");
 app.set('views', path.join(__dirname, 'views'));
 
