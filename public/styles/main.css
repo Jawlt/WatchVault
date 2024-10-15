@@ -1,0 +1,291 @@
+/* Make sure html and body take up the full height */
+html, body {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    background: #31363F;
+    color: #EEEEEE;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Main content should take up available space */
+main {
+    flex: 1; /* This allows the main content to grow and push the footer to the bottom */
+}
+
+.copyright {
+    color: #76ABAE;
+    text-align: center;
+    margin-top: 10px;
+    position: relative;
+    top: 0;
+    width: 100%;
+}
+
+.my-navbar {
+    background: #31363F !important;
+}
+
+.navbar .navbar-brand {
+    color: #76ABAE !important;
+    font-weight: bold;
+    font-size: 2rem;
+    margin-left: 2rem;
+    transform: skewX(-10deg) rotate(-2deg);
+}
+
+.navbar .navbar-nav .nav-link {
+    color: #EEEEEE !important;
+    font-size: 20px;
+}
+
+.navbar .navbar-nav .nav-link.active {
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.navbar-collapse .navbar-nav {
+    align-items: center; /* Aligns items to the right */
+}
+
+#username {
+    color: #76ABAE !important;
+    font-weight: bold;
+}
+
+#username:hover {
+    text-decoration: underline;
+}
+
+ /* centered "+" button */
+ #add-entry-svg {
+    background: rgba(34, 40, 49, 0.24);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    border-radius: 25px;
+}
+
+#add-entry-svg svg {
+    background-color: #76ABAE;
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.3s ease;
+}
+
+#add-entry-svg svg:hover {
+    opacity: 1;
+}
+
+/* Modal styling */
+.modal {
+    display: none; /* Hidden by default */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Black background with opacity */
+    overflow: hidden;
+}
+
+.modal-content {
+    background-color: #EEEEEE; /* Transparent white */
+    padding: 40px;
+    max-width: 400px;
+    width: 100%;
+    margin: 10% auto; /* Centering the modal */
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Similar shadow to login/signup */
+    text-align: center; /* Center the text */
+    color: #000; /* Text color */
+}
+
+/* Modal header (h2) styling similar to login/signup */
+.modal-content h2 {
+    margin-bottom: 20px;
+    color: #000; /* Black text for consistency */
+}
+
+/* Input styling similar to login/signup */
+.modal-content input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    background-color: rgba(255, 255, 255, 0.5);
+    color: #333;
+}
+
+.modal-content input:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.modal-content select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    background-color: rgba(255, 255, 255, 0.5);
+    color: #333;
+}
+
+.modal-content select:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Button styling similar to login/signup */
+.modal-content button {
+    width: 100%;
+    padding: 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.modal-content button:hover {
+    background-color: #0056b3;
+}
+
+/* Close button styling */
+.close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid #76ABAE;
+    color: #76ABAE;
+    font-size: 20px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.close:hover,
+.close:focus {
+    background-color: #76ABAE; /* Darker background on hover */
+    border: 2px solid #EEEEEE;
+    color: #EEEEEE; /* White X on hover */
+}
+
+/* Disable scrolling when modal is open */
+body.modal-open {
+    overflow: hidden;
+}
+
+.card-container {
+    padding: 20px;
+    justify-content: center;
+    width: 100%; /* Ensure it takes full available width */
+}
+
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 200px)); /* Each card will have a fixed width of 200px */
+    grid-auto-rows: 300px; /* Each row will have a height of 300px */
+    gap: 10px; /* 10px gap between the cards */
+    justify-content: start; /* Centers the grid items */
+}
+
+/* Styling for the card */
+.card {
+    position: relative;
+    border-radius: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    height: 300px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s, background-color 0.3s, height 0.3s;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.card.add {
+    height: 300px !important;
+}
+
+.card:hover {
+    box-shadow: 0 0 10px 5px rgba(63, 114, 175, 0.5);
+}
+
+/* Styling for the image in the card */
+.card img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 200px;
+    height: 300px;
+    object-fit: cover;
+    object-position: center;
+    transition: filter 0.3s;
+    z-index: 0;
+}
+
+/* Button styling */
+.card h3 {
+    z-index: 1;
+}
+
+/* Button styling */
+.button {
+    background-color: #31363F;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.85);
+    outline: 2px solid #76ABAE;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;   
+    cursor: pointer;   
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.3s ease; 
+}
+
+.delete {
+    position: absolute;
+    right: 10px;
+    top: 10px; 
+}
+
+.delete svg {
+    stroke: #76ABAE;
+}
+
+.like-dislike {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+}
+
+.button svg {
+    width: 24px;
+    height: 24px; 
+}
+
+.button:hover {
+    transform: scale(1.10); 
+}
+

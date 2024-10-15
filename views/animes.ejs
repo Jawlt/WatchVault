@@ -1,0 +1,192 @@
+<%- include("partials/header.ejs") %>
+
+<% if (!firstAnime) { %>
+    <div class="card-container">
+        <div class="card-grid" id="cardGrid">
+            <div class="card add" id="add-entry-svg" style="cursor: pointer;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+            </div>
+            <% animes.forEach(function(anime) { %>
+                <div class="card">
+                    <img src="<%= anime.url %>" alt="<%= anime.name %>">
+                    <h3 hidden><%= anime.name %></h3>
+                    <div class="button like-dislike" data-anime-name="<%= anime.name %>" data-anime-opinion="<%= anime.opinion %>">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24px" height="24px">
+                            <path 
+                                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                                fill="<%= anime.opinion === 'liked' ? 'red' : 'white' %>"
+                                stroke="<%= anime.opinion === 'liked' ? 'white' : 'black' %>"
+                            />
+                        </svg>
+                    </div>
+                    <div class="button delete" data-anime-name="<%= anime.name %>">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="black" stroke-width="2" viewBox="0 0 24 24" width="24px" height="24px">
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                        </svg>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+<% } else { %>
+    <!-- centered add entry plus SVG -->
+    <div id="add-entry-svg" style="cursor: pointer;">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+    </div>
+<% } %>
+
+
+<!-- Modal for Adding New Animes -->
+<div id="entryModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Add Anime</h2>
+        <form id="addAnimeForm">
+            <input type="text" id="animeTitle" name="title" placeholder="Anime Title" required><br><br>
+            <select id="opinion" name="opinion" required>
+                <option value="" disabled selected>Select your opinion</option>
+                <option value="liked">Liked</option>
+                <option value="disliked">Disliked</option>
+            </select><br><br>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</div>
+
+
+<%- include("partials/footer.ejs", { user: user }) %>
+
+<script>
+    $(document).ready(function() {
+        // Show the modal and disable body scrolling
+        $("#add-entry-svg").click(function() {
+            $("#entryModal").fadeIn(); // Show modal
+            $("body").addClass("modal-open");
+        });
+
+        // Close the modal and re-enable body scrolling
+        $(".close").click(function() {
+            $("#entryModal").fadeOut(); // Hide modal
+            $("body").removeClass("modal-open");
+        });
+
+        // Close the modal when clicking outside of the modal content
+        $(window).click(function(event) {
+            if ($(event.target).is("#entryModal")) {
+                $("#entryModal").fadeOut(); // Hide modal
+                $("body").removeClass("modal-open");
+            }
+        });
+    
+        $('#addAnimeForm').submit(async function(e)  {
+            e.preventDefault(); // Prevent the default form submission
+
+            // Gather form data
+            const animeName = $('#animeTitle').val();
+            const opinion = $('#opinion').val();
+            console.log("Anime Title:", animeName);
+            console.log("Opinion:", opinion);
+
+            try {
+                // Send the data using Axios
+                const response = await axios.post('/anime/add', {
+                    animeName: animeName,
+                    opinion: opinion
+                }, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.status === 200) {
+                    // Success: Anime added
+                    console.log(response.data.message);
+                    //alert(response.data.message);
+                    location.reload(); // Reload the page to reflect the new anime in the list
+                }
+            } catch (error) {
+                // Handle "Anime already exists" or other errors
+                if (error.response && error.response.status === 400) {
+                    //alert(error.response.data.error); // Show "Anime already exists"
+                    console.error('Anime already exists');
+                } else {
+                    //alert('An error occurred. Please try again.');
+                    console.error('An error occurred. Please try again.');
+                }
+            }
+        });
+
+        $(document).on('click', '.delete', async function(event) {
+            const animeName = $(this).data('anime-name');
+            const card = $(this).closest('.card');
+
+            console.log('Deleting anime:', animeName);
+
+            try {
+            // Send a DELETE request to your server
+            const response = await axios.delete('/anime/delete', {
+                data: { animeName: animeName }, 
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.status === 200) {
+                // Successfully deleted the anime
+                console.log(response.data.message);
+                //alert(response.data.message);
+
+                // Remove the corresponding card from the DOM
+                card.remove();
+            }
+            } catch (error) {
+                console.error('Error deleting anime:', error);
+                //alert('Error deleting anime. Please try again.');
+            }
+        });
+
+        $(document).on('click', '.like-dislike', async function(event) {
+            const animeName = $(this).data('anime-name');
+            const opinion = $(this).data('anime-opinion');
+            const button = $(this); // Save reference to the clicked button
+
+            // Toggle the opinion locally before sending it to the server
+            const newOpinion = opinion === "liked" ? "disliked" : "liked";
+            
+            console.log("Sending updated data:", { animeName: animeName, opinion: opinion });
+
+            try {
+            // Send a PATCH request to your server
+            const response = await axios.patch('/anime/update-anime-opinion', {
+                animeName: animeName,
+                opinion: opinion
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.status === 200) {
+                // Successfully updated anime opinion
+                console.log(response.data.message);
+                //alert(response.data.message);
+
+                // Update the button's data attribute and the SVG color based on the new opinion
+                button.data('anime-opinion', newOpinion);
+                
+                // Find the SVG path element inside the clicked button and change its fill color
+                button.find('path').attr('fill', newOpinion === 'liked' ? 'red' : 'white');
+                button.find('path').attr('stroke', newOpinion === 'liked' ? 'white' : 'black');
+            }
+            } catch (error) {
+                console.error('Error updating opinion:', error);
+                //alert('Error updating opinion. Please try again.');
+            }
+        });
+    });
+</script>
