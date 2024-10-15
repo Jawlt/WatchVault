@@ -13,6 +13,10 @@ import { Upload } from '@aws-sdk/lib-storage';
 import dotenv from 'dotenv';
 dotenv.config();
 
+// Get __dirname in ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const app = express();
 const port = process.env.PORT || 3000;
 const API_URL = "";
@@ -21,10 +25,6 @@ const API_URL = "";
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
-// Get __dirname in ES Modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 app.set("view engine", "ejs");
 app.set('views', path.join(__dirname, 'views'));
@@ -40,13 +40,16 @@ const store = new MongoDBStore({
     collection: 'sessions'
 });
 
-// Use MongoDB session store
+// MongoDB session store setup using connect-mongo
 app.use(session({
     secret: 'watch-vault-project',
     resave: false,
     saveUninitialized: false,
-    store: store,  // Persistent store instead of MemoryStore
-    cookie: { secure: false }  // Set secure to true if using HTTPS
+    store: MongoStore.create({
+        mongoUrl: process.env.MONGODB_URI,
+        collectionName: 'sessions'
+    }),
+    cookie: { secure: false }  // Set to true for HTTPS
 }));
 
 function checkLoginAuth(req, res, next) {
