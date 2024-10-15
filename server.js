@@ -3,7 +3,7 @@ import axios from "axios";
 import bodyParser from "body-parser";
 import { MongoClient } from "mongodb";
 import session from "express-session";
-import MongoDBStore from 'connect-mongodb-session';
+import MongoStore from 'connect-mongo';
 import bcrypt from "bcryptjs";
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -11,6 +11,7 @@ import path from "path";
 import { S3Client } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import dotenv from 'dotenv';
+
 dotenv.config();
 
 // Get __dirname in ES Modules
@@ -22,7 +23,7 @@ const port = process.env.PORT || 3000;
 const API_URL = "";
 
 //Middleware
-app.use(express.static("public"));
+app.use(express.static(__dirname + "/public/"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
@@ -33,12 +34,6 @@ app.set('views', path.join(__dirname, 'views'));
 const uri = process.env.MONGODB_URI;
 const client = new MongoClient(uri);
 const usersCollection = client.db("WatchVault").collection("users");
-
-//MongoDB session store setup
-const store = new MongoDBStore({
-    uri: process.env.MONGODB_URI,
-    collection: 'sessions'
-});
 
 // MongoDB session store setup using connect-mongo
 app.use(session({
