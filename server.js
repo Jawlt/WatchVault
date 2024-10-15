@@ -13,7 +13,6 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 const API_URL = "";
-const path = require('path');
 
 //Middleware
 app.use(express.static("public"));
