@@ -4,6 +4,8 @@ import bodyParser from "body-parser";
 import { MongoClient } from "mongodb";
 import session from "express-session";
 import bcrypt from "bcryptjs";
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 import path from "path";
 import { S3Client } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
@@ -18,15 +20,33 @@ const API_URL = "";
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(session({
-    secret: 'watch-vault-project',
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false } //set to true for https
-}));
+
+// Get __dirname in ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 app.set("view engine", "ejs");
 app.set('views', path.join(__dirname, 'views'));
+
+//MongoDB Connection
+const uri = process.env.MONGODB_URI;
+const client = new MongoClient(uri);
+const usersCollection = client.db("WatchVault").collection("users");
+
+//MongoDB session store setup
+const store = new MongoDBStore({
+    uri: process.env.MONGODB_URI,
+    collection: 'sessions'
+});
+
+// Use MongoDB session store
+app.use(session({
+    secret: 'watch-vault-project',
+    resave: false,
+    saveUninitialized: false,
+    store: store,  // Persistent store instead of MemoryStore
+    cookie: { secure: false }  // Set secure to true if using HTTPS
+}));
 
 function checkLoginAuth(req, res, next) {
     if(req.session && req.session.user) {
@@ -35,11 +55,6 @@ function checkLoginAuth(req, res, next) {
         res.redirect("/login");
     }
 }
-
-//MongoDB Connection
-const uri = process.env.MONGODB_URI;
-const client = new MongoClient(uri);
-const usersCollection = client.db("WatchVault").collection("users");
 
 async function main() {
     try {
