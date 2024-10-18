@@ -1,8 +1,116 @@
 <%- include("partials/header.ejs") %>
 
-<div class="test">
-    <h1> THIS IS BE THE DASHBOARD CONTAINED A OVERVIEW OF WHAT THE USER HAS STORED AKA % OF MOVIES TV SHOWS ANIMES ON THE RIGHT SIDE OF THE SCREEN IN A PIE CHART OR SO. 
-        LEFT SIDE WILL CONTAIN A SHORT MSG </h1>
+<div class="dashboard-container">
+    <!-- Left side message -->
+    <div class="dashboard-message">
+        <h1>Welcome, <%= user.username %>!</h1>
+        <% if ((user.movies && user.movies.length > 0) || (user.tvshows && user.tvshows.length > 0) || (user.animes && user.animes.length > 0)) { %>
+            <p>You have stored the following in WatchVault:</p>
+            <ul>
+                <% if (user.movies && user.movies.length > 0) { %>
+                    <li><%= user.movies.length %> movies</li>
+                <% } %>
+                <% if (user.tvshows && user.tvshows.length > 0) { %>
+                    <li><%= user.tvshows.length %> TV shows</li>
+                <% } %>
+                <% if (user.animes && user.animes.length > 0) { %>
+                    <li><%= user.animes.length %> anime</li>
+                <% } %>
+            </ul>
+            <p>Keep exploring and adding more to your collection!</p>
+        <% } else { %>
+            <p>You haven't stored any movies, TV shows, or anime yet.</p>
+            <p>Start adding some to keep track!</p>
+        <% } %>
+    </div>
+
+    <!-- Right side pie chart -->
+    <div class="dashboard-chart">
+        <canvas id="storageChart"></canvas> <!-- Chart size is controlled by CSS now -->
+    </div>
 </div>
 
 <%- include("partials/footer.ejs") %>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('storageChart').getContext('2d');
+
+    <% if ((user.movies && user.movies.length > 0) || (user.tvshows && user.tvshows.length > 0) || (user.animes && user.animes.length > 0)) { %>
+        // Render the actual pie chart when data exists
+        const storageChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Movies', 'TV Shows', 'Anime'],
+                datasets: [{
+                    label: 'Stored Items',
+                    data: [
+                        <%= user.movies ? user.movies.length : 0 %>, 
+                        <%= user.tvshows ? user.tvshows.length : 0 %>, 
+                        <%= user.animes ? user.animes.length : 0 %>
+                    ],
+                    backgroundColor: [
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 99, 132, 1)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 99, 132, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: false,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                const label = tooltipItem.label || '';
+                                const value = tooltipItem.raw;
+                                return `${label}: ${value} stored`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    <% } else { %>
+        // Render a fallback pie chart when there's no data
+        const noRecordChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['No Record'],
+                datasets: [{
+                    label: 'No Data',
+                    data: [100], // 100% slice for "No Record"
+                    backgroundColor: ['rgba(200, 200, 200, 0.8)'], // Light grey for "No Record"
+                    borderColor: ['rgba(150, 150, 150, 1)'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: false,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return `No Record: 100%`; // Tooltip text for the "No Record" chart
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    <% } %>
+</script>

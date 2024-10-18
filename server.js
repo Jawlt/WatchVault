@@ -13,7 +13,6 @@ import { Upload } from '@aws-sdk/lib-storage';
 import dotenv from 'dotenv';
 
 dotenv.config();
-
 // Get __dirname in ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -78,9 +77,9 @@ const s3Client = new S3Client({
 const TMDB_API_URL = "https://api.themoviedb.org/3";
 
 //Routes
-app.get("/", checkLoginAuth, (req, res) => {
+app.get("/", checkLoginAuth, async (req, res) => {
     console.log(`Welcome, ${req.session.user.username}`);
-    res.render("index", { user: req.session.user, currentPath: req.path });
+    res.render("index", { user: req.session.user, currentPath: req.path});
 });
 
 app.get("/login", (req, res) => {

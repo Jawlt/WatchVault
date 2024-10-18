@@ -58,6 +58,37 @@ main {
     text-decoration: underline;
 }
 
+.dashboard-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;  /* Two equal columns */
+    gap: 20px;  /* Adjust the gap between the two parts */
+    align-items: center;  /* Vertically center the content */
+}
+
+.dashboard-message {
+    /* Left side */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;  /* Center vertically */
+    align-items: center;  /* Align text to the start (left) */
+}
+
+.dashboard-message h1 {
+    color: #76ABAE;
+}
+
+.dashboard-chart {
+    /* Right side */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#storageChart {
+    width: 600px;
+    height: 600px;
+}
+
  /* centered "+" button */
  #add-entry-svg {
     background: rgba(34, 40, 49, 0.24);
