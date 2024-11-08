@@ -10,6 +10,8 @@ import { dirname } from 'path';
 import path from "path";
 import { S3Client } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
+import nodemailer from "nodemailer";
+import crypto from 'crypto';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -45,6 +47,15 @@ app.use(session({
     }),
     cookie: { secure: false }  // Set to true for HTTPS
 }));
+
+// Set up the transporter
+const transporter = nodemailer.createTransport({
+    service: 'gmail', // Use 'gmail', 'yahoo', 'outlook' or SMTP settings for a custom provider
+    auth: {
+        user: process.env.EMAIL_USER, // Your email address
+        pass: process.env.EMAIL_PASS  // Your email password or app password
+    }
+});
 
 function checkLoginAuth(req, res, next) {
     if(req.session && req.session.user) {
@@ -102,6 +113,24 @@ app.get("/logout", (req, res) => {
     });
 });
 
+app.get("/forgotpassword", (req, res) => {
+    res.render("forgotpassword");
+});
+
+app.get("/resetpassword", async (req, res) => {
+    const { token } = req.query;
+
+    // Verify if the token exists in the database
+    const user = await usersCollection.findOne({ resetToken: token });
+    if (!user) {
+        console.log("Invalid or expired token.");
+        return res.redirect("/forgotpassword");
+    }
+
+    // Render a reset password form (assuming you have an EJS or HTML file for this)
+    res.render("resetpassword", { resetToken: token});
+});
+
 app.get("/movies", checkLoginAuth, async (req, res) => {
     console.log(`Movies, ${req.session.user.username}`);
 
@@ -144,7 +173,6 @@ app.get("/animes", checkLoginAuth, async (req, res) => {
     res.render("animes", { user: req.session.user, currentPath: req.path, animes: user.animes, firstAnime: firstAnime});
 });
 
-
 //Handling login
 app.post("/login", async (req, res) => {
     const { email, password } = req.body;
@@ -181,6 +209,64 @@ app.post("/signup", async (req, res) => {
     } catch (e) {
         console.error(e);
         res.status(500).send("Error signing up.");
+    }
+});
+
+//Handling forgotpassword
+app.post("/forgotpassword", async (req, res) => {
+    const { email } = req.body;
+    try {
+        const user = await usersCollection.findOne({ email: email });
+        if (!user) {
+            console.log("User not found");
+            return res.redirect("/forgotpassword");
+        }
+
+        // Generate a reset token and create a reset link
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        await usersCollection.updateOne({ email : email }, { $set: { "resetToken": resetToken } });
+
+        const resetLink = `${process.env.BASE_URL}/resetpassword?token=${resetToken}`;
+
+        // Send the email
+        const mailOptions = {
+            from: process.env.EMAIL_USER, // sender address
+            to: email,                    // receiver's email
+            subject: "Password Reset Request", // Subject line
+            text: `Click the following link to reset your password: ${resetLink}`, // Plain text body
+            html: `<p>Click the following link to reset your password:</p><a href="${resetLink}">${resetLink}</a>` // HTML body
+        };
+
+        await transporter.sendMail(mailOptions);
+        console.log("Password reset link sent to email.");
+
+        res.redirect("/login");
+    } catch (e) {
+        console.error(e);
+        res.status(500).send("Error processing request.");
+    }
+});
+
+//Handling resetpassword
+app.post("/resetpassword", async (req, res) => {
+    const { token, newPassword } = req.body;
+    try {
+        const user = await usersCollection.findOne({ resetToken: token });
+        if (!user) {
+            console.log("Invalid or expired token.");
+            return res.redirect("/forgotpassword");
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await usersCollection.updateOne(
+            { resetToken: token }, 
+            { $set: { password: hashedPassword }, $unset: { resetToken: "" } }
+        );
+
+        res.redirect("/login");
+    } catch (e) {
+        console.error(e);
+        res.status(500).send("Error resetting password.");
     }
 });
 
